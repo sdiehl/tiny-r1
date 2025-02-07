@@ -4,7 +4,10 @@
 
 # Tiny-R1
 
-Recreating the DeepSeek-R1 GRPO reinforcement learning process for both multi-gpu (trl) and single-gpu (Unsloth).
+Recreating the DeepSeek-R1 GRPO reinforcement learning process. We process the [OpenAI GSM8K](https://huggingface.co/datasets/openai/gsm8k) dataset and train the model. We provide two training approaches:
+
+1. [GPU Rich](#1-multi-gpu-training-acceleratedeepspeed)
+2. [GPU Poor](#2-single-gpu-training-unsloth)
 
 ## 1. Multi-GPU Training (Accelerate/DeepSpeed)
 
