@@ -1,8 +1,7 @@
 import re
-from unsloth import FastLanguageModel, PatchFastRL
-from unsloth import is_bfloat16_supported
-from trl import GRPOConfig, GRPOTrainer
 from datasets import load_dataset, Dataset
+from trl import GRPOConfig, GRPOTrainer
+from unsloth import FastLanguageModel, PatchFastRL, is_bfloat16_supported
 
 PatchFastRL("GRPO", FastLanguageModel)
 
@@ -151,7 +150,7 @@ def main():
     dataset = get_gsm8k_questions()
 
     training_args = GRPOConfig(
-        use_vllm=True,  # use vLLM for fast inference!
+        use_vllm=True, # Use the vllm for inference
         learning_rate=5e-6,
         adam_beta1=0.9,
         adam_beta2=0.99,
@@ -163,15 +162,14 @@ def main():
         bf16=is_bfloat16_supported(),
         fp16=not is_bfloat16_supported(),
         per_device_train_batch_size=1,
-        gradient_accumulation_steps=1,  # Increase to 4 for smoother training
-        num_generations=6,  # Decrease if out of memory
+        gradient_accumulation_steps=1,
+        num_generations=6,
         max_prompt_length=256,
         max_completion_length=200,
-        # num_train_epochs = 1, # Set to 1 for a full training run
         max_steps=250,
         save_steps=250,
         max_grad_norm=0.1,
-        report_to="none",  # Can use Weights & Biases
+        # report_to="wandb",
         output_dir="outputs",
     )
 
@@ -190,8 +188,11 @@ def main():
         args=training_args,
         train_dataset=dataset,
     )
+    print("Training...")
     trainer.train()
+    print("Done training.")
 
+    print("Saving...")
     model.save_lora(LORA_NAME)
     model.save_pretrained_merged(
         "model",
@@ -199,6 +200,7 @@ def main():
         save_method="merged_16bit",
     )
     model.save_pretrained_gguf("model", tokenizer, quantization_method="q4_k_m")
+    print("Done saving.")
 
 if __name__ == "__main__":
     main()
