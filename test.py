@@ -1,8 +1,9 @@
 from unsloth import FastLanguageModel
 from vllm import SamplingParams
+from prep_data import SYSTEM_PROMPT
 
 LORA_NAME = "grpo_saved_lora"
-SAMPLE_PROMPT = "Calculate pi."
+SAMPLE_PROMPT = "Which is greater 9.10 or 9.9?"
 
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name="meta-llama/meta-Llama-3.1-8B-Instruct",
