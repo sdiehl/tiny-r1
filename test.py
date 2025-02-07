@@ -1,4 +1,4 @@
-from unsloth import FastLanguageModel, PatchFastRL
+from unsloth import FastLanguageModel
 from vllm import SamplingParams
 
 LORA_NAME = "grpo_saved_lora"

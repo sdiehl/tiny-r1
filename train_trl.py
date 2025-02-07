@@ -23,7 +23,10 @@ def parse_reasoning_response(text: str) -> dict:
     match = re.search(pattern, text, re.DOTALL)
     if not match:
         return {"thinking_content": "", "response": text}
-    return {"thinking_content": match.group(1).strip(), "response": match.group(2).strip()}
+    return {
+        "thinking_content": match.group(1).strip(),
+        "response": match.group(2).strip(),
+    }
 
 
 def get_completion_content(completion: dict) -> str:
@@ -33,16 +36,21 @@ def get_completion_content(completion: dict) -> str:
 def parse_responses(completions: list[dict]) -> list[dict]:
     return [parse_reasoning_response(get_completion_content(c)) for c in completions]
 
+
 # Score accuracy of answer and log rewards
 def accuracy_reward_log(prompts, completions, answer, **kwargs):
     log_rewards(prompts, completions, answer)
     return accuracy_reward(prompts, completions, answer)
 
+
 # Score accuracy of answer
 def accuracy_reward(prompts, completions, answer, **kwargs) -> list[float]:
     parsed_responses = parse_responses(completions)
-    rewards = [2.0 if r["response"] == a else 0.0 for r, a in zip(parsed_responses, answer)]
+    rewards = [
+        2.0 if r["response"] == a else 0.0 for r, a in zip(parsed_responses, answer)
+    ]
     return rewards
+
 
 # Score formatting of number (integer expected)
 def format_number_reward(prompts, completions, answer, **kwargs) -> list[float]:
@@ -50,10 +58,14 @@ def format_number_reward(prompts, completions, answer, **kwargs) -> list[float]:
     rewards = [0.5 if r["response"].isdigit() else 0.0 for r in parsed_responses]
     return rewards
 
+
 # Score formatting of reasoning content
 def format_reasoning_reward(prompts, completions, answer, **kwargs) -> list[float]:
     parsed_responses = parse_responses(completions)
-    rewards = [0.5 if r["thinking_content"] and r["response"] else 0.0 for r in parsed_responses]
+    rewards = [
+        0.5 if r["thinking_content"] and r["response"] else 0.0
+        for r in parsed_responses
+    ]
     return rewards
 
 
@@ -67,7 +79,7 @@ def log_rewards(prompts, completions, answer, **kwargs):
     example_response = get_completion_content(completions[0])
     example_parsed = parse_reasoning_response(example_response)
     example_answer = answer[0]
-    example_prompt = prompts[0][-1]['content']
+    example_prompt = prompts[0][-1]["content"]
     print(
         f"-" * 50
         + f"\nExample prompt:\n{example_prompt}\n"
@@ -104,7 +116,10 @@ def load_data(split="train") -> Dataset:
         lambda x: {
             "prompt": [
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": x["question"] + "\nAnswer with a number only."},
+                {
+                    "role": "user",
+                    "content": x["question"] + "\nAnswer with a number only.",
+                },
             ],
             "answer": extract_hash_answer(x["answer"]),
         }
@@ -132,6 +147,7 @@ def main(training_args, model_args):
     # Train the model and save/push checkpoints.
     trainer.train()
     trainer.save_model(training_args.output_dir)
+
 
 if __name__ == "__main__":
     parser = TrlParser((GRPOConfig, ModelConfig))
