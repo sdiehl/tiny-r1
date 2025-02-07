@@ -4,9 +4,9 @@ set -e
 
 nohup accelerate launch \
     --num_processes 3 \
-    --config_file zero3.yaml src/train_gsm8k.py \
-    --output_dir outputs/Llama-3.1-8B-Reasoning \
+    --config_file zero3.yaml train_trl.py \
     --model_name_or_path meta-llama/Llama-3.1-8B-Instruct \
+    --output_dir outputs/Llama-3.1-8B-Reasoning \
     --max_prompt_length 2048 \
     --max_completion_length 2048 \
     --per_device_train_batch_size 1 \

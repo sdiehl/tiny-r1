@@ -1,4 +1,3 @@
-import re
 from datasets import load_dataset, Dataset
 
 SYSTEM_PROMPT = """

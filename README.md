@@ -25,8 +25,8 @@ Bob has worked 40 hours/week x 2 weeks = 80 regular hours Bob got paid 80 hours 
 
 Into the format ChatML format enriched with reasoning and answer in XML format.
 
-```
-<|im_start|>system
+```xml
+<|begin_of_text|><|start_header_id|>system<|end_header_id|>
 Respond in the following format:
 <reasoning>
 ...
@@ -34,11 +34,9 @@ Respond in the following format:
 <answer>
 ...
 </answer>
-<|im_end|>
-<|im_start|>user
+<|eot_id|><|start_header_id|>user<|end_header_id|>
 Bob gets paid $5 an hour for the regular hours he works and $6 an hour for any overtime hours he works. All hours over 40 in a week are considered overtime. If Bob works 44 hours in the first week and 48 hours in the second week, how much did he make?
-<|im_end|>
-<|im_start|>assistant
+<|eot_id|><|start_header_id|>assistant<|end_header_id|>
 <reasoning>
 Bob has worked 40 hours/week x 2 weeks = 80 regular hours
 Bob got paid 80 hours x $5/hour = $400 for his regular hours
@@ -51,7 +49,7 @@ In 2 weeks Bob earned $400 + $72 = $472
 <answer>
 472
 </answer>
-<|im_end|>
+<|eot_id|>
 ```
 
 
