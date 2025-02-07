@@ -9,6 +9,52 @@ Recreating the DeepSeek-R1 GRPO reinforcement learning process. We process the [
 1. [GPU Rich](#1-multi-gpu-training-acceleratedeepspeed)
 2. [GPU Poor](#2-single-gpu-training-unsloth)
 
+## Data Processing
+
+Question:
+
+```
+Bob gets paid $5 an hour for the regular hours he works and $6 an hour for any overtime hours he works. All hours over 40 in a week are considered overtime. If Bob works 44 hours in the first week and 48 hours in the second week, how much did he make?
+```
+
+Answer:
+
+```
+Bob has worked 40 hours/week x 2 weeks = 80 regular hours Bob got paid 80 hours x $5/hour = $400 for his regular hours Bob worked 44 hours - 40 hours = 4 hours of overtime in the first week Bob worked 48 hours - 40 hours = 8 hours of overtime in the second week In total Bob worker 8 hours + 4 hours =12 hours of overtime. Bob got paid $6/hour x 12 hours = $72 for overtime In 2 weeks Bob earned $400 + $72 = $472 #### 472
+```
+
+Into the format ChatML format enriched with reasoning and answer in XML format.
+
+```
+<|im_start|>system
+Respond in the following format:
+<reasoning>
+...
+</reasoning>
+<answer>
+...
+</answer>
+<|im_end|>
+<|im_start|>user
+Bob gets paid $5 an hour for the regular hours he works and $6 an hour for any overtime hours he works. All hours over 40 in a week are considered overtime. If Bob works 44 hours in the first week and 48 hours in the second week, how much did he make?
+<|im_end|>
+<|im_start|>assistant
+<reasoning>
+Bob has worked 40 hours/week x 2 weeks = 80 regular hours
+Bob got paid 80 hours x $5/hour = $400 for his regular hours
+Bob worked 44 hours - 40 hours = 4 hours of overtime in the first week
+Bob worked 48 hours - 40 hours = 8 hours of overtime in the second week
+In total Bob worker 8 hours + 4 hours = 12 hours of overtime.
+Bob got paid $6/hour x 12 hours = $72 for overtime
+In 2 weeks Bob earned $400 + $72 = $472
+</reasoning>
+<answer>
+472
+</answer>
+<|im_end|>
+```
+
+
 ## 1. Multi-GPU Training (Accelerate/DeepSpeed)
 
 This approach is suitable for environments with multiple GPUs and uses Accelerate with DeepSpeed ZeRO-3 for distributed training.
