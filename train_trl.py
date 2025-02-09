@@ -12,6 +12,7 @@ from reward import (
     xmlcount_reward_func,
 )
 
+
 def main(training_args, model_args):
     data = get_gsm8k_questions()
 
