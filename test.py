@@ -26,14 +26,12 @@ sampling_params = SamplingParams(
     top_p=0.95,
     max_tokens=1024,
 )
-output = (
-    model.fast_generate(
-        text,
-        sampling_params=sampling_params,
-        lora_request=model.load_lora(LORA_NAME),
-    )[0]
-    .outputs[0]
-    .text
+
+output = model.fast_generate(
+    text,
+    sampling_params=sampling_params,
+    lora_request=model.load_lora(LORA_NAME),
 )
 
-print(output)
+answer = output[0].outputs[0].text
+print(answer)

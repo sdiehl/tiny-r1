@@ -4,7 +4,9 @@
 
 # Tiny-R1
 
-Recreating the DeepSeek-R1 GRPO reinforcement learning process. We process the [OpenAI GSM8K](https://huggingface.co/datasets/openai/gsm8k) dataset and train the model. We provide two training approaches:
+Recreating the DeepSeek-R1 GRPO reinforcement learning process by fine-tuning a smaller language model to exhibit reasoning behavior.
+
+We process the [OpenAI GSM8K](https://huggingface.co/datasets/openai/gsm8k) dataset and train the model. We provide two training approaches:
 
 1. [GPU Rich](#1-multi-gpu-training-acceleratedeepspeed) ( 4 x H200 SXM )
 2. [GPU Poor](#2-single-gpu-training-unsloth) ( 1 x A100 SXM )
@@ -52,24 +54,14 @@ In 2 weeks Bob earned $400 + $72 = $472
 <|eot_id|>
 ```
 
-
 ## 1. Multi-GPU Training (Accelerate/DeepSpeed)
 
 This approach is suitable for environments with multiple GPUs and uses Accelerate with DeepSpeed ZeRO-3 for distributed training.
-
-### Requirements
-
-- Multiple GPUs (recommended 4+ H100s)
-- CUDA compatible environment
-
-### Setup
 
 ```bash
 # Install required packages
 ./setup.sh
 ```
-
-### Running Training
 
 ```bash
 # Launch multi-GPU training
@@ -79,46 +71,57 @@ This approach is suitable for environments with multiple GPUs and uses Accelerat
 The multi-GPU configuration uses DeepSpeed ZeRO-3 as defined in `zero3.yaml`:
 
 ```zero3.yaml
-compute_environment: LOCAL_MACHINE
-debug: false
-deepspeed_config:
-  deepspeed_multinode_launcher: standard
-  offload_optimizer_device: none
-  offload_param_device: cpu
-  zero3_init_flag: true
-  zero3_save_16bit_model: true
-  zero_stage: 3
-distributed_type: DEEPSPEED
-downcast_bf16: 'no'
-machine_rank: 0
-main_training_function: main
-mixed_precision: bf16
-num_machines: 1
-num_processes: 4
-rdzv_backend: static
-same_network: true
-tpu_env: []
-tpu_use_cluster: false
-tpu_use_sudo: false
-use_cpu: false
+output_dir: outputs/Llama-3.1-8B-Reasoning
+model_name_or_path: meta-llama/Llama-3.1-8B-Instruct
+model_revision: main
+
+# Hyperparameters
+learning_rate: 5.0e-7
+lr_scheduler_type: cosine
+max_steps: 450
+gradient_accumulation_steps: 8
+per_device_train_batch_size: 1
+warmup_ratio: 0.03
+beta: 0.001
+max_prompt_length: 256
+max_completion_length: 1024
+num_generations: 8
+seed: 1337
+
+# Inference Compute
+use_vllm: true
+vllm_gpu_memory_utilization: 0.5
+vllm_device: "cuda:3"
+
+# Memory Usage
+torch_dtype: bfloat16
+attn_implementation: flash_attention_2
+bf16: true
+tf32: true
+gradient_checkpointing: true
+gradient_checkpointing_kwargs:
+  use_reentrant: false
+
+# Logging
+logging_strategy: steps
+logging_steps: 2
+report_to:
+- wandb
+
+# Saving
+save_strategy: "steps"
+save_steps: 25
 ```
 
 ## 2. Single-GPU Training (Unsloth)
 
 This approach is optimized for single GPU environments using Unsloth's optimizations.
 
-### Requirements
-
-- Single A100 GPU or better (recommended)
-- CUDA compatible environment
-
-### Setup
 ```bash
 # Install required packages
 ./setup.sh
 ```
 
-### Running Training
 ```bash
 python train_unsloth.py
 ```
@@ -160,7 +163,7 @@ from unsloth import FastLanguageModel
 from vllm import SamplingParams
 
 LORA_NAME = "grpo_saved_lora"
-SAMPLE_PROMPT = "Calculate pi."
+SAMPLE_PROMPT = "Which is greater 9.10 or 9.9?"
 
 model, tokenizer = FastLanguageModel.from_pretrained(
     model_name="meta-llama/meta-Llama-3.1-8B-Instruct",
@@ -183,18 +186,13 @@ sampling_params = SamplingParams(
     top_p=0.95,
     max_tokens=1024,
 )
-output = (
-    model.fast_generate(
-        text,
-        sampling_params=sampling_params,
-        lora_request=model.load_lora(LORA_NAME),
-    )[0]
-    .outputs[0]
-    .text
+
+output = model.fast_generate(
+    text,
+    sampling_params=sampling_params,
+    lora_request=model.load_lora(LORA_NAME),
 )
 
-print(output)
+answer = output[0].outputs[0].text
+print(answer)
 ```
-
-
-The test script loads the saved LoRA weights and runs inference with the trained model.
